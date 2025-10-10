@@ -349,27 +349,6 @@ python -m server.main
 echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | python -m server.main
 ```
 
----
-
-## 🔒 Security Considerations
-
-### What's Protected
-- ✅ Critical system processes protected by allowlist
-- ✅ Rate limiting prevents accidental mass terminations
-- ✅ Explicit confirmation required for all kills
-- ✅ Dry-run mode for testing
-- ✅ Access denied errors handled gracefully
-
-### What's NOT Protected
-- ⚠️ This tool provides **local system access only**
-- ⚠️ No authentication layer (relies on OS permissions)
-- ⚠️ User must have permissions to kill processes
-- ⚠️ Allowlist can be bypassed with `unsafe=true`
-
-**⚡ Use Responsibly:** This tool gives AI assistants process management capabilities. Always review commands before execution.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
