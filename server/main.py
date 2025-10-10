@@ -1,51 +1,62 @@
 from mcp.server.fastmcp import FastMCP  
-from schema import CPUStats, MemoryStats, DiskStats, NetworkStats
-import psutil
+from typing import List, Dict, Any, Optional
+
+# FIX: Add dots for relative imports
+from .system_tools import get_cpu, get_memory, get_disk, get_network, get_system_summary
+from .process_tools import process_list, process_kill_safe
+from .security import process_is_safe
+from .schema import CPUStats, MemoryStats, DiskStats, NetworkStats, ProcessInfo, SystemSummary
+from .config import config
 
 sysdash = FastMCP(
     name="sysdash",
     instructions="A system dashboard for monitoring and managing your system processes and telemetry"
 )
 
-@sysdash.tool(name = "get_cpu",description = "Get CPU usage and information",structured_output = True)
-def get_cpu() -> CPUStats:
-    return {
-        "overall": psutil.cpu_percent(interval=None),
-        "per_core": psutil.cpu_percent(interval=None, percpu=True)
-    }
+@sysdash.tool()
+def system_get_cpu() -> Dict[str, Any]:
+    return get_cpu()
 
-@sysdash.tool(name = "get_memory",description = "Get memory usage and information",structured_output = True)
-def get_memory() -> MemoryStats:
-    mem = psutil.virtual_memory()
-    return {
-        "total": mem.total,
-        "used": mem.used,
-        "percent": mem.percent
-    }
 
-@sysdash.tool(name = "get_disk",description = "Get disk usage and information",structured_output = True)
-def get_disk() -> DiskStats:
-    disks = []
-    for part in psutil.disk_partitions():
-        try:
-            usage = psutil.disk_usage(part.mountpoint)
-        except:
-            continue
-        disks.append(DiskStats(
-            mount = part.mountpoint,
-            total = usage.total,
-            used = usage.used,
-            percent = usage.percent
-        ))
-    return disks
+@sysdash.tool()
+def system_get_memory() -> Dict[str, Any]:
+    return get_memory()
 
-@sysdash.tool(name = "get_network",description = "Get network usage and information",structured_output = True)
-def get_network() -> NetworkStats:
-    net = psutil.net_io_counters()
-    return {
-        "bytes_sent": net.bytes_sent,
-        "bytes_recv": net.bytes_recv
-    }
+
+@sysdash.tool()
+def system_get_disk() -> List[Dict[str, Any]]:
+    return get_disk()
+
+
+@sysdash.tool()
+def system_get_network() -> Dict[str, Any]:
+    return get_network()
+
+@sysdash.tool(description="List running processes with filtering and sorting options")
+def list_processes(sort_by: str = "cpu", limit: int = 10, name_contains: Optional[str] = None, user: Optional[str] = None) -> List[Dict[str, Any]]:
+    return process_list(sort_by=sort_by, limit=limit, name_contains=name_contains, user=user)
+
+@sysdash.tool()
+def kill_process(pid: int, confirm: bool = False, unsafe: bool = False, dry_run: bool = False) -> Dict[str, Any]:
+    result = process_kill_safe(pid, confirm, unsafe, dry_run)
+    return {"success": result["ok"], "message": result["message"]}
+
+@sysdash.tool()
+def get_summary(window_s: int = 5, top_n: int = 3) -> Dict[str, Any]:
+    """Get aggregated system statistics over a time window.
+    
+    Samples CPU and memory over the specified window, then returns averaged stats
+    along with top processes and high-usage disks.
+    
+    Args:
+        window_s: Sampling window in seconds (default: 5, range: 1-60)
+        top_n: Number of top processes to include (default: 3, range: 1-10)
+    
+    Returns:
+        Dict with avg_cpu_percent, mem_percent, top_processes, and high_usage_disks
+    """
+    return get_system_summary(window_s=window_s, top_n=top_n)
+
 
 if __name__ == "__main__":
     sysdash.run()
