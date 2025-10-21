@@ -374,19 +374,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the [Model Context Protocol](https://modelcontextprotocol.io/)
 
 ---
-
-## 📧 Contact
-
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter) - your.email@example.com
-
-Project Link: [https://github.com/yourusername/SysMCP](https://github.com/yourusername/SysMCP)
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you find it useful!**
-
-Made with ❤️ for the MCP community
-
-</div>
